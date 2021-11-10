@@ -75,7 +75,6 @@ function newBoard(cells: PlayerOrEmpty[]): Board {
 }
 
 
-
 function init (): GamePlugin {
     let framework: GameFramework | null = null
     let g: Game | undefined = undefined
