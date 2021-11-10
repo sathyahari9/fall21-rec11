@@ -76,10 +76,53 @@ function newBoard(cells: PlayerOrEmpty[]): Board {
 
 
 
-// TODO: Implement the plugin
-//
-// function init (): GamePlugin {
-//     throw new Error("not yet implemented")
-// }
-//
-// export { init }
+function init (): GamePlugin {
+    let framework: GameFramework | null = null
+    let g: Game | undefined = undefined
+    let move = 0
+    return {
+        getGameName () { return 'Tic Tac TOe' },
+    
+        getGridWidth (): number { return 3 },
+    
+        getGridHeight (): number { return 3 },
+        onRegister (f: GameFramework): void { framework = f },
+        onNewGame (): void {
+          if (framework === null) return
+          g = initializeGame()
+        },
+        onNewMove (): void { }, // Nothing to do here.
+        isMoveValid (x: number, y: number): boolean {
+          return true // Impossible to make an invalid move.
+        },
+        isMoveOver (): boolean {
+          return move === 0
+        },
+        onMovePlayed (x: number, y: number): void {
+          move = 1
+          g = g?.play(x,y)
+          let s = g?.getNextPlayer()
+          if (s === Player.PlayerX){
+            framework?.setSquare(x,y,'O')
+          }
+          else{
+            framework?.setSquare(x,y,'X')
+          }
+          move = 0
+        },
+        isGameOver (): boolean {
+          return (g?.getWinner() !== null)
+        },
+        getGameOverMessage (): string {
+          switch (g?.getWinner()) {
+            case Player.PlayerX: return "X wins"
+            case Player.PlayerO: return "O wins"
+            default: throw new Error('Called getGameOverMessage with incomplete game')
+          }
+        },
+        onGameClosed (): void { }, // Nothing to do here.
+        currentPlayer (): string { return 'Human' }
+      }
+}
+
+export { init }
