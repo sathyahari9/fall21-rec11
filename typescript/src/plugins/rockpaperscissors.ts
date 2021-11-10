@@ -41,10 +41,53 @@ function play (move: State): Result {
   return winner(move, randomMove())
 }
 
-// TODO: Implement the plugin
-//
-// function init (): GamePlugin {
-//     throw new Error("not yet implemented")
-// }
-//
-// export { init }
+const GAME_START_FOOTER = 'You are playing Rocks Paper Scissors with a computer!'
+const PLAYER_WON_MSG = 'You won!'
+const COMPUTER_WON_MSG = 'The computer won!'
+const GAME_TIED_MSG = 'The game ended in a tie.'
+
+function init (): GamePlugin {
+  let framework: GameFramework | null = null
+  let gameResult: Result | null = null
+  return {
+    getGameName () { return 'Rocks Paper Scissors' },
+
+    getGridWidth (): number { return 3 },
+
+    getGridHeight (): number { return 1 },
+    onRegister (f: GameFramework): void { framework = f },
+    onNewGame (): void {
+      if (framework === null) return
+      framework.setFooterText(GAME_START_FOOTER)
+      framework.setSquare(State.ROCK, 0, 'Rock')
+      framework.setSquare(State.PAPER, 0, 'Paper')
+      framework.setSquare(State.SCISSORS, 0, 'Scissors')
+      gameResult = null
+    },
+    onNewMove (): void { }, // Nothing to do here.
+    isMoveValid (x: number, y: number): boolean {
+      return true // Impossible to make an invalid move.
+    },
+    isMoveOver (): boolean {
+      return gameResult !== null
+    },
+    onMovePlayed (x: number, y: number): void {
+      gameResult = play(x)
+    },
+    isGameOver (): boolean {
+      return gameResult !== null
+    },
+    getGameOverMessage (): string {
+      switch (gameResult) {
+        case Result.TIE: return GAME_TIED_MSG
+        case Result.WIN: return PLAYER_WON_MSG
+        case Result.LOSE: return COMPUTER_WON_MSG
+        default: throw new Error('Called getGameOverMessage with incomplete game')
+      }
+    },
+    onGameClosed (): void { }, // Nothing to do here.
+    currentPlayer (): string { return 'Human' }
+  }
+}
+
+export { init }
